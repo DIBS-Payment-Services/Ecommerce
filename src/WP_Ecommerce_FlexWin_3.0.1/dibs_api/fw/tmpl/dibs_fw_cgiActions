@@ -1,0 +1,15 @@
+<tr>
+    <td style="vertical-align: top; padding: 5px 5px 5px 0px;">#actions_lbl#</td>
+    <td style="padding: 5px;">
+        <form id="dibsflex_cgiform" action="#cgi_url#" method="post">
+            <div>
+                <input type="hidden" name="transact" value="#transac#" />
+                <input type="hidden" name="currency" value="#currency#" />
+                <input type="hidden" name="amount" value="#amount#" />
+                <input type="hidden" name="orderid" value="#orderid#" />
+                <input type="hidden" name="dibsflexreturn" value="#return_url#" />
+                #controls#
+            </div>
+        </form>
+    </td>
+</tr>

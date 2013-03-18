@@ -1,0 +1,1 @@
+<input#decorator# type="submit" name="#name#" value="#capture_msg#" />
