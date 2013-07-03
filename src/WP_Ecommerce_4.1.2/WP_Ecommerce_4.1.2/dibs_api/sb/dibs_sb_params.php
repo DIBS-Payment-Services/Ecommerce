@@ -26,14 +26,13 @@ class dibs_pw_settingsBuilder_params {
                              'DESCR' => 'System checks if every order ID unique.'),
         'CAPTURENOW'=> array('LABEL' => 'Capture now:',
                              'DESCR' => 'Make attempt to capture the transaction upon a successful authorization. (DIBS PW only)'),
-        'METHOD'    => array('LABEL' => 'Payment Window type:',
-                             'DESCR' => 'Select Payment Window to use on cheeckout.'),
+      
         'FEE'       => array('LABEL' => 'Add fee:',
                              'DESCR' => 'Customer pays fee.'),
-        'VOUCHER'   => array('LABEL' => 'Enable vouchers:',
-                             'DESCR' => 'Enable customer to pay with vouchers. (Mobile PW only)'),
         'PAYTYPE'   => array('LABEL' => 'Paytype:',
                              'DESCR' => 'Paytypes available to customer (e.g.: VISA,MC)'),
+        
+        
         'HMAC'      => array('LABEL' => 'HMAC:',
                              'DESCR' => 'Key for transactions security.'),
         'LANG'      => array('LABEL' => 'Language:',
@@ -53,8 +52,7 @@ class dibs_pw_settingsBuilder_params {
     private $aSettingsBase = array(
         'MID'       => array('type'    => 'text',
                              'default' => ''),
-        'METHOD'    => array('type'    => 'select',
-                             'default' => '2'),
+      
         'HMAC'      => array('type'    => 'text',
                              'default' => ''),
         'TESTMODE'  => array('type'    => 'checkbox',
@@ -63,12 +61,10 @@ class dibs_pw_settingsBuilder_params {
                              'default' => ''),
         'CAPTURENOW'=> array('type'    => 'checkbox',
                              'default' => ''),
-        'VOUCHER'   => array('type'    => 'checkbox',
-                             'default' => ''),
         'UNIQ'      => array('type'    => 'checkbox',
                              'default' => ''),
         'PAYTYPE'   => array('type'    => 'text',
-                             'default' => ''),
+                             'default' => ''), 
         'LANG'      => array('type'    => 'select',
                              'default' => 'en_UK'),
         'ACCOUNT'   => array('type'    => 'text',
@@ -86,7 +82,6 @@ class dibs_pw_settingsBuilder_params {
     private $aLang = array(
         'da_DK'  => 'Danish',
         'en_UK'  => 'English',
-        'fi_FIN' => 'Finnish',
         'nb_NO'  => 'Norwegian',
         'sv_SE'  => 'Swedish',
     );

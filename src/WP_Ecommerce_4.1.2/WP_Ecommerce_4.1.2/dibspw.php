@@ -81,19 +81,15 @@ function nzshpcrt_dibspw_process() {
         switch($_GET['dibspw_result']) {
             case 'callback': 
                 $oDIBS->api_dibs_action_callback($mOrder);
+                
+               
+                exit;
             break;
             case 'success':
+               $sResult = $oDIBS->api_dibs_action_success($mOrder);
                 if(!isset($_GET['page_id']) || get_permalink($_GET['page_id']) != get_option('transact_url')) {
-                    $sResult = $oDIBS->api_dibs_action_success($mOrder);
+                 
                     if(empty($sResult)) {
-                        $sTransac = isset($_POST['transaction']) ? 
-                                    dibs_pw_api::api_dibs_sqlEncode($_POST['transaction']) : "";
-                        $oDIBS->helper_dibs_db_write("UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "`
-                                                      SET `processed` = '" . 
-                                                      $oDIBS->helper_dibs_tools_conf('status') . "',
-                                                      `transactid`='" . $sTransac . "'
-                                                      WHERE `id` = '" . $mOrder['id'] . "' LIMIT 1;");
-                    
                         $sLocation = add_query_arg('sessionid', $_POST['s_pid'], get_option('transact_url'));
                         wp_redirect($sLocation);
                         exit();
