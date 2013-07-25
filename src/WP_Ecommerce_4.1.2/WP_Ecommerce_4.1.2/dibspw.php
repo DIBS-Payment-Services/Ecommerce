@@ -3,6 +3,10 @@
 require_once(WPSC_FILE_PATH . '/wpsc-merchants/dibs_api/pw/dibs_pw_api.php');
 require_once(WPSC_FILE_PATH . '/wpsc-merchants/dibs_api/sb/dibs_sb.php');
 
+if( version_compare( get_option( 'wpsc_version' ), '3.8.9', '>=' ) ) {
+    require_once(WPSC_FILE_PATH . '/wpsc-includes/purchase-log.class.php');
+ }
+
 $nzshpcrt_gateways[$num] = array('name'            => 'DIBS Payment Window',
                                  'internalname'    => 'dibspw',
                                  'function'        => 'gateway_dibspw',
@@ -78,12 +82,21 @@ function nzshpcrt_dibspw_process() {
         array_walk($_POST, create_function('&$val', '$val = stripslashes($val);'));
         $oDIBS = new dibs_pw_api();
         $mOrder = $oDIBS->cms_dibs_getOrderById($_POST['s_pid']);
+        $orderId = $_POST['orderid'];
         switch($_GET['dibspw_result']) {
             case 'callback': 
-                $oDIBS->api_dibs_action_callback($mOrder);
-                
-               
-                exit;
+             if( version_compare( get_option( 'wpsc_version' ), '3.8.9', '>=' ) )
+              {
+                  if ($oDIBS->api_dibs_action_callback($mOrder)) {
+                    $purchaselog = new WPSC_Purchase_Log($orderId);
+                    $purchaselog->set('processed', 3);$purchaselog ->save();
+                    $wpscmerch = new wpsc_merchant($orderId, false);
+                    $wpscmerch->set_purchase_processed_by_purchid($oDIBS->helper_dibs_tools_conf('status'));
+                  } 
+              }else {
+                     $oDIBS->api_dibs_action_callback($mOrder);
+              }
+                      
             break;
             case 'success':
                $sResult = $oDIBS->api_dibs_action_success($mOrder);

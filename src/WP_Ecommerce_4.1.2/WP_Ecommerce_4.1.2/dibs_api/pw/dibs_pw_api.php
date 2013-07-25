@@ -147,7 +147,7 @@ class dibs_pw_api extends dibs_pw_helpers {
         if(!empty($sAccount)) $aData['account'] = $sAccount;
         $aData['acceptreturnurl'] = $this->helper_dibs_tools_url($oOrder->urls->acceptreturnurl);
         $aData['cancelreturnurl'] = $this->helper_dibs_tools_url($oOrder->urls->cancelreturnurl);
-        $aData['callbackurl']     = $oOrder->urls->callbackurl;
+        $aData['callbackurl']     =  $oOrder->urls->callbackurl;
         if(strpos($aData['callbackurl'], '/5c65f1600b8_dcbf.php') === FALSE) {
             $aData['callbackurl'] = $this->helper_dibs_tools_url($aData['callbackurl']);
         }
@@ -344,14 +344,18 @@ class dibs_pw_api extends dibs_pw_helpers {
             }
             
             $sTransac = $_POST['transaction']; 
-             if($sTransac) { 
+             if($sTransac) {
+                if( version_compare( get_option( 'wpsc_version' ), '3.8.9', '<' ) ) {
                 $this->helper_dibs_db_write("UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "`
                 SET `processed` = '" . $this->helper_dibs_tools_conf('status') . "',
                 `transactid`='" . $sTransac . "' WHERE `id` = '" . $mOrder['id'] . "' LIMIT 1;");
+               }               
+                
              }
         }
         else $this->api_dibs_updateResultRow(array('callback_error' => 8));
-        exit();
+        //exit();
+        return true;
     }
  
     /**
