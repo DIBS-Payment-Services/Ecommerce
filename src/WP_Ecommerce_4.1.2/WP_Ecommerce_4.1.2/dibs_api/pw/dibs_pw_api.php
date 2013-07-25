@@ -353,8 +353,8 @@ class dibs_pw_api extends dibs_pw_helpers {
                 
              }
         }
-        else $this->api_dibs_updateResultRow(array('callback_error' => 8));
-        //exit();
+        else { $this->api_dibs_updateResultRow(array('callback_error' => 8));
+             exit(); }
         return true;
     }
  
