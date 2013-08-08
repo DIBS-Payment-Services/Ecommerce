@@ -58,7 +58,7 @@ function gateway_dibsflex($separator, $sessionid) {
 
     $aData = $oDIBS->api_dibs_get_requestFields($mOrderInfo);
 
-    $sOutput = '<form id="dibsflex_form" name="dibsflex_form" method="post" action="' .
+    $sOutput = '<form id="dibsflex_form" name="dibsflex_form" method="post" accept-charset="UTF-8" action="' .
                 dibs_fw_api::api_dibs_get_formAction() . '">' . "\n";
     foreach($aData as $sKey => $sValue) {
         $sOutput .= '<input type="hidden" name="' . $sKey . '" value="' . $sValue . '" />' . "\n";
