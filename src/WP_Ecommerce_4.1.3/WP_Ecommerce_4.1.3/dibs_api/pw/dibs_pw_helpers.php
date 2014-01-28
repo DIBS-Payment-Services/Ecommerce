@@ -210,7 +210,7 @@ class dibs_pw_helpers extends dibs_pw_helpers_cms implements dibs_pw_helpers_int
      */
     function helper_dibs_obj_etc($mOrderInfo) {
         return (object)array(
-                    'sysmod'      => 'wp3e_4_1_2',
+                    'sysmod'      => 'wp3e_4_1_3',
                     'callbackfix' => $this->helper_dibs_tools_url("/?dibspw_result=callback"),
                     'pid'         => $mOrderInfo['additional']['pid'],
         );
