@@ -155,6 +155,17 @@ class dibs_pw_helpers extends dibs_pw_helpers_cms implements dibs_pw_helpers_int
         );
     }
     
+    function helper_dibs_obj_discount($mOrderInfo) {
+         return (object)array(
+            'id'    => "discount0",
+            'name'  => "Discount",
+            'sku'   => "",
+            'price' => -$mOrderInfo['cart']->coupons_amount,
+            'qty'   => 1,
+            'tax'   => 0
+        );
+    }
+    
     /**
      * Build CMS customer addresses to API object.
      * 
@@ -210,7 +221,7 @@ class dibs_pw_helpers extends dibs_pw_helpers_cms implements dibs_pw_helpers_int
      */
     function helper_dibs_obj_etc($mOrderInfo) {
         return (object)array(
-                    'sysmod'      => 'wp3e_4_1_3',
+                    'sysmod'      => 'wp3e_4_1_4',
                     'callbackfix' => $this->helper_dibs_tools_url("/?dibspw_result=callback"),
                     'pid'         => $mOrderInfo['additional']['pid'],
         );

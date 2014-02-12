@@ -90,7 +90,8 @@ class dibs_pw_api extends dibs_pw_helpers {
         return (object)array(
             'items' => $this->helper_dibs_obj_items($mOrderInfo),
             'ship'  => $this->helper_dibs_obj_ship($mOrderInfo),
-            'addr'  => $this->helper_dibs_obj_addr($mOrderInfo)
+            'addr'  => $this->helper_dibs_obj_addr($mOrderInfo),
+            'discount' => $this->helper_dibs_obj_discount($mOrderInfo)
         );
     }
 
@@ -167,6 +168,8 @@ class dibs_pw_api extends dibs_pw_helpers {
             if(!empty($sVal)) $aData[$sKey] = self::api_dibs_utf8Fix($sVal);
         }
         $oOrder->items[] = $oOrder->ship;
+        $oOrder->items[] = $oOrder->discount;
+        
         if(isset($oOrder->items) && count($oOrder->items) > 0) {
             $aData['oitypes'] = 'QUANTITY;UNITCODE;DESCRIPTION;AMOUNT;ITEMID;' .
                                 (self::$bTaxAmount ? 'VATAMOUNT' : 'VATPERCENT');
@@ -190,7 +193,7 @@ class dibs_pw_api extends dibs_pw_helpers {
                 }
                 unset($iTmpPrice, $sTmpName);
             }
-	}
+ 	}
         if(!empty($aData['orderid'])) $aData['yourRef'] = $aData['orderid'];
         if((string)$this->helper_dibs_tools_conf('capturenow') == 'yes') $aData['capturenow'] = 1;
         $sDistribType = $this->helper_dibs_tools_conf('distr');
@@ -318,7 +321,8 @@ class dibs_pw_api extends dibs_pw_helpers {
                    WHERE `orderid` = '" . self::api_dibs_sqlEncode($_POST['orderid']) . "' 
                    LIMIT 1;";
                    
-            $status= $this->helper_dibs_db_read_single($sQuery, 'status') ;
+        $status= $this->helper_dibs_db_read_single($sQuery, 'status') ;
+        
         if($status == "PENDING" || empty($status)) {
             $aFields = array('callback_action' => 1);
             $aResponse = $_POST;
