@@ -20,6 +20,8 @@ class dibs_pw_settingsBuilder_params {
     private $aText = array(
         'MID'       => array('LABEL' => 'Merchant ID:',
                              'DESCR' => 'Your merchant ID in DIBS system.'),
+        'PID'       => array('LABEL' => 'Partner ID:',
+                             'DESCR' => 'Partner ID.'), 
         'TESTMODE'  => array('LABEL' => 'Test mode:',
                              'DESCR' => 'Run transactions in test mode.'),
         'UNIQ'      => array('LABEL' => 'Unique order ID:',
@@ -52,7 +54,9 @@ class dibs_pw_settingsBuilder_params {
     private $aSettingsBase = array(
         'MID'       => array('type'    => 'text',
                              'default' => ''),
-      
+        'PID'       => array('LABEL' => 'Partner ID:',
+                             'DESCR' => 'Partner ID.'),            
+
         'HMAC'      => array('type'    => 'text',
                              'default' => ''),
         'TESTMODE'  => array('type'    => 'checkbox',
