@@ -396,7 +396,6 @@ class dibs_pw_api extends dibs_pw_helpers {
      */
     final public static function api_dibs_calcMAC($aData, $sHMAC, $bUrlDecode = FALSE) {
         $sMAC = "";
-        $fl = fopen( "/home/maxwhite/wp-mac-error.txt", "a+");
         if(!empty($sHMAC)) {
             $sData = "";
             if(isset($aData['MAC'])) unset($aData['MAC']);
@@ -404,7 +403,6 @@ class dibs_pw_api extends dibs_pw_helpers {
             foreach($aData as $sKey => $sVal) {
                 $sData .= "&" . $sKey . "=" . (($bUrlDecode === TRUE) ? urldecode($sVal) : $sVal);
             }
-            fputs($fl, $sData."\n");
             $sMAC = hash_hmac("sha256", ltrim($sData, "&"), self::api_dibs_hextostr($sHMAC));
         }
         return $sMAC;
