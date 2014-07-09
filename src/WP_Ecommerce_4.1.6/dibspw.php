@@ -68,14 +68,14 @@ function dibspayment_paywin_gateway($separator, $sessionid) {
             
             $dibsInvoiceFields = array("acquirerLastName",          "acquirerFirstName",
                                        "acquirerDeliveryAddress",   "acquirerDeliveryPostalCode",
-                                       "acquirerDeliveryPostalPlace" );
+                                       "acquirerDeliveryPostalPlace", "transaction");
             $dibsInvoiceFieldsString = "";
             foreach($_POST as $key=>$value) {
               if(in_array($key, $dibsInvoiceFields)) {
                    $dibsInvoiceFieldsString .= "{$key}={$value}\n";              
               }
             }
-            
+           
             // Email is not send automatically on a success transactio page 
             // from version '3.8.9 so we send email on callback from this version 
             if( version_compare(get_option( 'wpsc_version' ), '3.8.9', '>=' ) ) {
