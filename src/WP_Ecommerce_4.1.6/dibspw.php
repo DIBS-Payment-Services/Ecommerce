@@ -61,21 +61,23 @@ function dibspayment_paywin_gateway($separator, $sessionid) {
                              die("HMAC error!");
               }       
                 
-            if( isset($_POST['MAC']) && $_POST['MAC'] != dibspayment_paywin_calc_mac($_POST, $hamc_key, $bUrlDecode = FALSE)) {
-                die("Mac is incorrect, fraud attempt!!");
+            if($hamc_key && isset( $_POST['MAC']) && $_POST['MAC']) {
+                            if( $_POST['MAC'] != dibspayment_paywin_calc_mac($_POST, $hamc_key, $bUrlDecode = FALSE)) {
+                                 die("MAC is incorrect, fraud attempt!");
+                            } 
             }
             
             
             $dibsInvoiceFields = array("acquirerLastName",          "acquirerFirstName",
                                        "acquirerDeliveryAddress",   "acquirerDeliveryPostalCode",
-                                       "acquirerDeliveryPostalPlace", "transaction");
+                                       "acquirerDeliveryPostalPlace" );
             $dibsInvoiceFieldsString = "";
             foreach($_POST as $key=>$value) {
               if(in_array($key, $dibsInvoiceFields)) {
                    $dibsInvoiceFieldsString .= "{$key}={$value}\n";              
               }
             }
-           
+            
             // Email is not send automatically on a success transactio page 
             // from version '3.8.9 so we send email on callback from this version 
             if( version_compare(get_option( 'wpsc_version' ), '3.8.9', '>=' ) ) {
@@ -116,9 +118,11 @@ function dibspayment_paywin_gateway($separator, $sessionid) {
                          if( $hamc_key && !isset( $_POST['MAC'])) {
                              die("HMAC error!");
                          }     
-                             
-                         if( isset( $_POST['MAC']) && $_POST['MAC'] != dibspayment_paywin_calc_mac($_POST, $hamc_key, $bUrlDecode = FALSE)) {
-                            die("HMAC is incorrect, fraud attempt!");
+                         
+                         if($hamc_key && isset( $_POST['MAC']) && $_POST['MAC']) {
+                            if( $_POST['MAC'] != dibspayment_paywin_calc_mac($_POST, $hamc_key, $bUrlDecode = FALSE)) {
+                                 die("HMAC is incorrect, fraud attempt!");
+                            } 
                          }
                          
                     } else {
@@ -410,7 +414,7 @@ function dibspayment_paywin_form() {
     );
     
     $dibs_params = '<tr> 
-      <td>Merchant ID:</td>
+      <td>DIBS Integration ID:</td>
             <td><input type="text" name="dibspw_mid" value="'.get_option('dibspw_mid').'" /></td>
         </tr>
           <tr>
