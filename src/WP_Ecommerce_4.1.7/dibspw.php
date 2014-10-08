@@ -7,14 +7,14 @@ $nzshpcrt_gateways[$num] = array('name'            => 'DIBS Payment Window',
                                  'submit_function' => 'dibspayment_paywin_submit',
                                  'payment_type'    => 'dibspw',
                                  //'display_name'    => 'DIBS Payment Window | Secured Payment Services',
-                                 'image'           =>  "http://m.c.lnkd.licdn.com/media/p/2/005/023/302/3889cf5.png",
+                                 //'image'           =>  "http://m.c.lnkd.licdn.com/media/p/2/005/023/302/3889cf5.png",
                                  'requirements'    => array(
                                     'php_version'      => 5.2,
                                     'extra_modules'    => array()
                                   ));
 
 define("DIBS_GATEWAY_URL", "https://sat1.dibspayment.com/dibspaymentwindow/entrypoint");
-define("DIBS_SYSMOD", "wp3e_4_1_6");
+define("DIBS_SYSMOD", "wp3e_4_1_7");
 /**
  * Generate form for checkout.
  * 
@@ -179,6 +179,19 @@ function dibspayment_paywin_submit() {
     }
     
     if (!isset($_POST['dibspw_form'])) $_POST['dibspw_form'] = array();
+    
+     if(isset($_POST['dibspw_cardslogo'])) {
+        update_option('dibspw_cardslogo', str_replace('\\', '', $_POST['dibspw_cardslogo']));
+    }
+    
+    if(isset($_POST['dibspw_invoicelogo'])) {
+        update_option('dibspw_invoicelogo', str_replace('\\', '', $_POST['dibspw_invoicelogo']));
+    }
+    
+    if(isset($_POST['dibspw_netbanklogo'])) {
+        update_option('dibspw_netbanklogo', str_replace('\\', '', $_POST['dibspw_netbanklogo']));
+    }
+   
     
     foreach((array)$_POST['dibspw_form'] as $key => $value) {
         update_option(('dibspw_form_' . $key), $value);
@@ -468,7 +481,8 @@ function dibspayment_paywin_form() {
                     Customer pays fee.
                 </span>
             </td>
-        </tr><tr>
+        </tr>
+        <tr>
           <td>Capture now:</td>
             <td><input type="checkbox" name="dibspw_capturenow" value="yes"'.checkbox_checked(get_option('dibspw_capturenow')).'/></td>
         </tr>
@@ -477,6 +491,55 @@ function dibspayment_paywin_form() {
             <td>
                 <span class="small description">
                     Make attempt to capture the transaction upon a successful authorization. (DIBS PW only)
+                </span>
+            </td>
+        </tr>
+                 <tr>
+          <td>Cards logo:</td>
+          <td>
+            <textarea type="checkbox" style="width:60%" name="dibspw_cardslogo" rows="4" cols="40">'.get_option('dibspw_cardslogo').'</textarea>
+          </td>
+        </tr>
+          <tr>
+            <td>&nbsp;</td>
+            <td>
+                <span class="small description">
+                    Please choose and confire logo on our site <a href="http://tech.dibspayment.com/logos#check-out-logos">http://tech.dibspayment.com/logos#check-out-logos</a>
+                    and paste html markup for Card logo here.
+                </span>
+            </td>
+        </tr>
+        
+        <tr>
+          <td>Netbank logo:</td>
+          <td>
+            <textarea type="checkbox" style="width:60%" name="dibspw_netbanklogo" rows="4" cols="20">'.get_option('dibspw_netbanklogo').'</textarea>
+          </td>
+        </tr>
+          <tr>
+            <td>&nbsp;</td>
+            <td>
+                <span class="small description">
+                             Please choose and confire logo on our site <a href="http://tech.dibspayment.com/logos#check-out-logos">http://tech.dibspayment.com/logos#check-out-logos</a>
+                    and paste html markup for Netbank logo here.
+          
+                </span>
+            </td>
+        </tr>
+
+         <tr>
+          <td>Invoice logo:</td>
+          <td>
+            <textarea type="checkbox" style="width:60%" name="dibspw_invoicelogo" rows="4" cols="20">'.get_option('dibspw_invoicelogo').'</textarea>
+          </td>
+        </tr>
+          <tr>
+            <td>&nbsp;</td>
+            <td>
+                <span class="small description">
+                              Please choose and confire logo on our site <a href="http://tech.dibspayment.com/logos#check-out-logos">http://tech.dibspayment.com/logos#check-out-logos</a>
+                    and paste html markup for Invoice logo here.
+          
                 </span>
             </td>
         </tr>
@@ -724,5 +787,20 @@ function dibspayment_paywin_form() {
          </tr>';
     return $dibs_params . $address_fields;
 }    
-       
+
+
+function dibspayment_paywin_checkout_form_dibspw($output) {
+    
+     $output = '';
+     $output .=  get_option('dibspw_cardslogo')  .  
+                 get_option('dibspw_netbanklogo').
+                 get_option('dibspw_invoicelogo') ;
+     
+     if( $output ) {
+         $output = '<tr><td>' .$output .'</td></tr>'; 
+     }
+     return $output;
+    
+ }
 add_action('init', 'dibspayment_paywin_process');
+add_filter('wpsc_gateway_checkout_form_dibspw', 'dibspayment_paywin_checkout_form_dibspw');

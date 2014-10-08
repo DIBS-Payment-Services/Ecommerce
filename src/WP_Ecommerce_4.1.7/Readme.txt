@@ -16,3 +16,7 @@ ver. 4.1.6 Release date: 05.22.2014
 - Fixed bugs and notices. 
 - Code styling in WP way. 
 - On invoice payments acquirer parameters saves in ordeer details. 
+
+ver. 4.1.7 Release date: 08.10.2014
+- added possibility to add DIBS logos in admin
+  http://tech.dibspayment.com/logos#check-out-logos
