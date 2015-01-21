@@ -24,3 +24,6 @@ ver. 4.1.6 Release date: 22.05.2014
 ver. 4.1.7 Release date: 10.08.2014
 - added possibility to add DIBS logos in admin
   http://tech.dibspayment.com/logos#check-out-logos
+ver. 4.1.8 Release date: 21.01.2015
+- added support for DX platform
+- small changes
