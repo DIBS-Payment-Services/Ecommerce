@@ -1,4 +1,13 @@
 <?php
+
+/*
+	Plugin Name: DIBS FlexWin Payment Gateway for WP e-Commerce
+	Plugin URI: 
+	Description: Payment plugin for Wordpress Ecommerce allow to use DIBS FlexWin.  
+	Version: 3.0.2
+	Author: dibs
+*/
+
 require_once str_replace("\\", "/", dirname(__FILE__)) . '/dibs_api/fw/dibs_fw_api.php';
 require_once str_replace("\\", "/", dirname(__FILE__)) . '/dibs_api/sb/dibs_fw_sb.php';
 
@@ -9,7 +18,7 @@ $nzshpcrt_gateways[$num] = array('name'            => 'DIBS FlexWin',
                                  'submit_function' => 'submit_dibsflex',
                                  'payment_type'    => 'dibsflex',
                                  'display_name'    => 'DIBS FlexWin',
-                                 'image'           =>  WPSC_URL . '/wpsc-merchants/dibs_api/imgs/dibsflex.gif',
+                                 'image'           =>  'http://m.c.lnkd.licdn.com/media/p/2/005/023/302/3889cf5.png',
                                  'requirements'    => array(
                                     'php_version'      => 5.2,
                                     'extra_modules'    => array()
@@ -24,25 +33,25 @@ $nzshpcrt_gateways[$num] = array('name'            => 'DIBS FlexWin',
  * @param string $sessionid 
  */
 function gateway_dibsflex($separator, $sessionid) {
-    global $wpdb, $wpsc_cart, $wpsc_purchlog_statuses;
-
+    global $wpsc_cart;
+   
     $wpsc_cart->get_shipping_option();
     $wpsc_cart->get_shipping_quotes();
     $wpsc_cart->get_shipping_method();
-    $subtotal = $wpsc_cart->calculate_subtotal();
+    $wpsc_cart->calculate_subtotal();
 
     $oDIBS = new dibs_fw_api();
-
+    
     $aProdFees = $oDIBS->cms_dibs_getFees();
     $sCurrency = $oDIBS->cms_dibs_getCurrency();
     $aPurchaseLog = $oDIBS->cms_dibs_getOrderById($sessionid);
     $aUserInfo = $_POST['collected_data'];
-
+   
+    
     $oDIBS->helper_dibs_db_write("UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "`
-                                           SET `processed` = '" . 
-                                           $oDIBS->helper_dibs_tools_conf('statusp') . "'
+                                           SET `processed` = '2'
                                            WHERE `id` = '" . $aPurchaseLog['id'] . "' LIMIT 1;");
-
+    
     $mOrderInfo = array(
         'currency'   => $sCurrency,
         'user'       => $aUserInfo,
@@ -56,6 +65,7 @@ function gateway_dibsflex($separator, $sessionid) {
         'total_tax'  => $wpsc_cart->total_tax
     );
 
+    
     $aData = $oDIBS->api_dibs_get_requestFields($mOrderInfo);
 
     $sOutput = '<form id="dibsflex_form" name="dibsflex_form" method="post" accept-charset="UTF-8" action="' .
@@ -63,18 +73,20 @@ function gateway_dibsflex($separator, $sessionid) {
     foreach($aData as $sKey => $sValue) {
         $sOutput .= '<input type="hidden" name="' . $sKey . '" value="' . $sValue . '" />' . "\n";
     }
+    $sOutput .= '<input type="submit" name="submit_to_dibs" value="Continue with DIBS Payment..." />' . "\n";
+  
     $sOutput .= '</form>'. "\n";
     echo $sOutput;
     echo "<script language=\"javascript\" type=\"text/javascript\">
              setTimeout('document.getElementById(\'dibsflex_form\').submit()', 5000);
           </script>";
+    
 
     exit();
+    
 }
 
 function nzshpcrt_dibsflex_process() {
-    global $wpdb;
-
     if(isset($_POST['s_pid'])) {
         array_walk($_POST, create_function('&$val', '$val = stripslashes($val);'));
         $oDIBS = new dibs_fw_api();
@@ -85,12 +97,6 @@ function nzshpcrt_dibsflex_process() {
                 if(empty($iCode)) {
                     $sTransac = isset($_POST['transact']) ? 
                                 dibs_fw_api::api_dibs_sqlEncode($_POST['transact']) : "";
-                    $oDIBS->helper_dibs_db_write("UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "`
-                                                  SET `processed` = '" . 
-                                                  $oDIBS->helper_dibs_tools_conf('status') . "',
-                                                  `transactid`='" . $sTransac . "'
-                                                  WHERE `id` = '" . $mOrder['id'] . "' LIMIT 1;");
-                    
                     $sLocation = add_query_arg('sessionid', $_POST['s_pid'], get_option('transact_url'));
                     wp_redirect($sLocation);
                     exit();
@@ -104,18 +110,10 @@ function nzshpcrt_dibsflex_process() {
         elseif(isset($_REQUEST['dibsflex_cancel']) && $_REQUEST['dibsflex_cancel'] == 'true') {
                 $oDIBS->api_dibs_action_cancel();
                 if (isset($_POST['orderid'])) {
-                    $oOrder = $oDIBS->helper_dibs_obj_order($mOrder);
-                    if(isset($oOrder->orderid) && $oOrder->orderid > 0) {
-                        transaction_results($_POST['s_pid'], false);
-                        $oDIBS->helper_dibs_db_write("UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "`
-                                                      SET `processed` = '" . 
-                                                      $oDIBS->helper_dibs_tools_conf('statusc') . "'
-                                                      WHERE `id` = '" . $oOrder->orderid . "' LIMIT 1;");
-                        wp_redirect(get_option('transact_url'));
-                        exit();
-                    }
+                     wp_redirect(get_option( 'shopping_cart_url' ));
+                     exit();
                 }
-                wp_redirect($oDIBS->helper_dibs_obj_urls()->carturl);            
+               
         }
         elseif(isset($_REQUEST['dibsflex_callback']) && $_REQUEST['dibsflex_callback'] == 'true') {
             $oDIBS->api_dibs_action_callback($mOrder);
@@ -123,6 +121,8 @@ function nzshpcrt_dibsflex_process() {
     }
 }
 
+/*
+ * Not realized yet!!
 function nzshpcrt_dibsflex_cgi() {
     if(isset($_GET['dibsflex_cgi']) && $_GET['dibsflex_cgi'] == 'true') {
         $oDIBS = new dibs_fw_api();
@@ -133,13 +133,15 @@ function nzshpcrt_dibsflex_cgi() {
 
 function nzshpcrt_dibsflex_cgibuttons() {
     global $wpdb, $purchlogitem;
-    
     if($purchlogitem->extrainfo->gateway == "dibsflex") {
         $oDIBS = new dibs_fw_api();
         echo '<p><strong>' . $oDIBS->helper_dibs_tools_lang('controls_title', 'lbl') . '</strong></p>';
-        echo $oDIBS->api_dibs_cgi_getAdminControls($purchlogitem->purchlogid);
+        
+        echo $oDIBS->api_dibs_cgi_getAdminControls($purchlogitem);
+        
     }
 }
+*/
 
 /**
  * Saving of module settings.
@@ -335,7 +337,6 @@ function form_dibsflex() {
     return $oDibsSb->render() . $sFieldsSync;
 }
 
-add_action('wpsc_billing_details_bottom', 'nzshpcrt_dibsflex_cgibuttons');
-add_action('init', 'nzshpcrt_dibsflex_cgi');
+//add_action('wpsc_billing_details_bottom', 'nzshpcrt_dibsflex_cgibuttons');
+//add_action('init', 'nzshpcrt_dibsflex_cgi');
 add_action('init', 'nzshpcrt_dibsflex_process');
-?>

@@ -167,7 +167,12 @@ class dibs_fw_api extends dibs_fw_helpers {
         $sCapturenow = $this->helper_dibs_tools_conf('capturenow');
         if((string)$sCapturenow == 'yes') $aData['capturenow'] = 1;
         $sUid = $this->helper_dibs_tools_conf('uniq');
-        if((string)$sUid == 'yes') $aData['uniqueoid'] = 1;
+        $aData['realorderid'] = $aData['orderid'];
+        if((string)$sUid == 'yes') {
+            $aData['uniqueoid'] = 1;
+            $aData['orderid'] =$aData['orderid'] . time();
+        }
+        
         $sVoucher = $this->helper_dibs_tools_conf('voucher');
         if((string)$sVoucher == 'yes') $aData['voucher'] = 'yes';
     }
@@ -367,6 +372,13 @@ class dibs_fw_api extends dibs_fw_helpers {
         if(isset($_POST['orderid']) && !empty($_POST['orderid'])) {
             $this->api_dibs_updateResultRow(array('cancel_action' => '1'));
         }
+        // On cancellation close order 
+        $orderid = $_POST['realorderid'];
+        $comment = "Customer cancelled payment in DIBS FlexWin";
+        $purchase_log = new WPSC_Purchase_Log($orderid);
+        $purchase_log->set('processed', WPSC_Purchase_Log::CLOSED_ORDER);
+        $purchase_log->set('notes', $comment);
+        $purchase_log->save();
     }
     
     /**
@@ -385,7 +397,7 @@ class dibs_fw_api extends dibs_fw_helpers {
         
    	$sQuery = "SELECT `status` FROM `" . $this->helper_dibs_tools_prefix() . 
                                              self::api_dibs_get_tableName() . "` 
-                   WHERE `orderid` = '" . self::api_dibs_sqlEncode($_POST['orderid']) . "' 
+                   WHERE `orderid` = '" . self::api_dibs_sqlEncode($_POST['realorderid']) . "' 
                    LIMIT 1;";
         if($this->helper_dibs_db_read_single($sQuery, 'status') == 0) {
             $aFields = array('callback_action' => 1, 'status' => 1);
@@ -399,8 +411,9 @@ class dibs_fw_api extends dibs_fw_helpers {
             }
             $aFields['ext_info'] = serialize($aResp);
             unset($aResp, $sDbKey, $sPostKey);
+            $aFields['orderid'] = $_POST['realorderid'];
             $this->api_dibs_updateResultRow($aFields);
-            
+           
             if(is_callable(array($this, 'helper_dibs_hook_callback')) &&
                     method_exists($this, 'helper_dibs_hook_callback')) {
                 $this->helper_dibs_hook_callback($mOrder);
@@ -416,7 +429,7 @@ class dibs_fw_api extends dibs_fw_helpers {
      * @param array $aFields
      */
     private function api_dibs_updateResultRow($aFields) {
-        if(isset($_POST['orderid']) && !empty($_POST['orderid'])) {
+        if(isset($_POST['realorderid']) && !empty($_POST['realorderid'])) {
             $sUpdate = "";
             foreach($aFields as $sCell => $sVal) {
                 $sUpdate .= "`" . $sCell . "`=" . "'" . self::api_dibs_sqlEncode($sVal) . "',";
@@ -425,7 +438,7 @@ class dibs_fw_api extends dibs_fw_helpers {
             $this->helper_dibs_db_write(
                 "UPDATE `" . $this->helper_dibs_tools_prefix() . self::api_dibs_get_tableName() . "`
                  SET " . rtrim($sUpdate, ",") . " 
-                 WHERE `orderid` = '" . self::api_dibs_sqlEncode($_POST['orderid']) . "' 
+                 WHERE `orderid` = '" . self::api_dibs_sqlEncode($_POST['realorderid']) . "' 
                  LIMIT 1;"
             );
         }
@@ -602,17 +615,17 @@ class dibs_fw_api extends dibs_fw_helpers {
      * @param int $sOrderId
      * @return string 
      */
-    public function api_dibs_cgi_getAdminControls($sOrderId) {
+    public function api_dibs_cgi_getAdminControls($purchlogitem) {
         $sApiUser = $this->helper_dibs_tools_conf("apiuser");
         $sApiPass = $this->helper_dibs_tools_conf("apipass");
         if(!empty($sApiUser) && !empty($sApiPass)) {
-            $sTransac = $this->helper_dibs_db_read_single("SELECT `transaction` AS transact FROM `" . 
-                            $this->helper_dibs_tools_prefix() . self::api_dibs_get_tableName() ."` 
-                            WHERE orderid=" . self::api_dibs_sqlEncode($sOrderId) . 
-                            " AND `status`='1' LIMIT 1", 'transact');
+            $sTransac = $purchlogitem->extrainfo->transactid;
+         
             if(!empty($sTransac)) {
+       
                 $mInfo = $this->api_dibs_cgi_getTransacInfo($sOrderId, $sTransac, $sApiUser, $sApiPass);
                 $mInfo = $this->api_dibs_cgi_prepareInfo($mInfo);
+                
                 return (is_array($mInfo)) ? $this->api_dibs_cgi_renderControlsBlock($mInfo, $sTransac) : $mInfo;
             }
             else return $this->helper_dibs_tools_lang(10, 'err');
@@ -682,10 +695,10 @@ class dibs_fw_api extends dibs_fw_helpers {
                                     'amount'      => $aState['amount'],
                                     'orderid'     => $aState['orderid'],
                                     'return_url'  => self::api_dibs_cgi_getFullUrl(),
-                                    'cgi_url'     => $this->helper_dibs_obj_urls()->cgiurl,
+                                    'cgi_url'     => get_option('siteurl') . '?dibsflex_cgi=true',  //$this->helper_dibs_obj_urls()->cgiurl,
                                     'controls'    => $sActions));
         }
-                
+               
         return self::api_dibs_renderTemplate(self::$aTemplates['tmpls']['buttons'], 
                                              array('cgiblock'  => $sCgiBlock));
     }
@@ -717,17 +730,21 @@ class dibs_fw_api extends dibs_fw_helpers {
             elseif(isset($_POST['cgirefund'])) $sAPI = 'refund';
             else $this->helper_dibs_tools_redirect($_POST['dibsflexreturn']);
     
+            
+            
             $aParams = array('orderid'   => $_POST['orderid'],
                             'merchant'  => $this->helper_dibs_tools_conf("mid"),
-                            'transact'  => $_POST['transact'], 'textreply' => 'yes',
-                            'currency'  => $_POST['currency'], 'amount'    => $_POST['amount']);
+                            'transact'  => $_POST['transact'], 
+                            'textreply' => 'yes',
+                            'currency'  => $_POST['currency'], 
+                            'amount'    => $_POST['amount']);
             $sPath = ($sAPI == 'capture') ? '/cgi-bin/' : '/cgi-adm/';
             $sAccount = $this->helper_dibs_tools_conf("account");
             if(!empty($sAccount)) $aParams['account'] = $sAccount;
     
             $sMD5 = $this->api_dibs_cgi_calcHash($aParams, $sAPI);
             if($sMD5 != "") $aParams['md5key'] = $sMD5;
-
+            
             $sRes = self::api_dibs_cgi_makeRequest($sApiLogin . ':' . $sApiPass, 
                                                    $sPath . $sAPI . ".cgi", $aParams);
         }
@@ -762,14 +779,17 @@ class dibs_fw_api extends dibs_fw_helpers {
     private static function api_dibs_cgi_makeRequestCurl($sAuthStr, $sQuery, $aParams) {
         $sProtocol = (self::$sCgiPort == 443) ? "s" : "";
         $ch = curl_init('http' . $sProtocol . '://' . $sAuthStr . "@" . self::$sCgiHost . $sQuery);
+        
         if($ch) {
             curl_setopt($ch, CURLOPT_PORT, self::$sCgiPort);
             curl_setopt($ch, CURLOPT_POST, TRUE);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $aParams);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
             curl_setopt($ch, CURLOPT_HEADER, FALSE);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-            return curl_exec($ch);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 3);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            $result = curl_exec($ch);
+            return $result;
             curl_close($ch);
         }
         

@@ -24,7 +24,6 @@ class dibs_fw_helpers extends dibs_fw_helpers_cms implements dibs_fw_helpers_int
      */
     public function helper_dibs_db_read_single($sQuery, $sName) {
         global $wpdb;
-
         $mResult = $wpdb->get_results($sQuery);
         return isset($mResult[0]->$sName) ? $mResult[0]->$sName : null;
     }
@@ -47,7 +46,6 @@ class dibs_fw_helpers extends dibs_fw_helpers_cms implements dibs_fw_helpers_int
      */
     public function helper_dibs_tools_prefix() {
         global $wpdb;
-        
         return $wpdb->prefix;
     }
 
@@ -207,14 +205,23 @@ class dibs_fw_helpers extends dibs_fw_helpers_cms implements dibs_fw_helpers_int
      */
     public function helper_dibs_obj_etc($mOrderInfo) {
         return (object) array(
-            'sysmod'      => 'wp3e_3_0_1',
+            'sysmod'      => 'wp3e_3_0_2',
             'callbackfix' => $this->helper_dibs_tools_url('/?dibsflex_callback=true'),
             'pid'         => $mOrderInfo['additional']['pid'],
         );
     }
 
     public function helper_dibs_hook_callback($oOrder) {
-        transaction_results($oOrder->sessionid, false, $_POST['transaction']);
+        if(isset($_POST['realorderid']) && $_POST['realorderid'] ) {
+                $orderid = $_POST['realorderid'];
+                $comment = "Callback was received form DIBS, "
+                         . "transaction={$_POST['transact']}, orderid={$orderid}";
+                $purchase_log = new WPSC_Purchase_Log($orderid);
+                $purchase_log->set('processed', WPSC_Purchase_Log::ACCEPTED_PAYMENT);
+                $purchase_log->set('transactid',  $_POST['transact']);
+                $purchase_log->set('notes', $comment);
+                $purchase_log->save();
+            }
     }
 }
 ?>

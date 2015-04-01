@@ -1,5 +1,5 @@
 <?php
-class dibs_fw_helpers_cms extends wpsc_merchant {
+class dibs_fw_helpers_cms {
 
     protected $aLang = array(
         'dibsflex_msg_toshop' => 'Return to shop',

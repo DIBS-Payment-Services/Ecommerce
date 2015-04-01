@@ -20,10 +20,14 @@ class dibs_fw_settingsBuilder_params {
     private $aText = array(
         'MID'       => array('LABEL' => 'Merchant ID:',
                              'DESCR' => 'Your merchant ID in DIBS system.'),
+        /*
         'APIUSER'   => array('LABEL' => 'API Login:',
                              'DESCR' => 'Your DIBS CGI API username.'),
+        
         'APIPASS'   => array('LABEL' => 'API Password:',
                              'DESCR' => 'Your DIBS CGI API password.'),
+        */
+        
         'TESTMODE'  => array('LABEL' => 'Test mode:',
                              'DESCR' => 'Run transactions in test mode.'),
         'UNIQ'      => array('LABEL' => 'Unique order ID:',
@@ -52,21 +56,17 @@ class dibs_fw_settingsBuilder_params {
                              'DESCR' => 'FlexWin theme color.'),
         'DISTR'     => array('LABEL' => 'Distribution type:',
                              'DESCR' => 'Invoices distribution type.'),
-        'STATUS'    => array('LABEL' => 'Success payment status:',
-                             'DESCR' => 'Order status after success transaction.'),
-        'STATUSP'   => array('LABEL' => 'Pending payment status:',
-                             'DESCR' => 'Order status before payment.'),
-        'STATUSC'   => array('LABEL' => 'Cancel payment status:',
-                             'DESCR' => 'Order status on cancellation.')
     );
         
     private $aSettingsBase = array(
         'MID'       => array('type'    => 'text',
                              'default' => ''),
+        /*
         'APIUSER'   => array('type'    => 'text',
                              'default' => ''),
         'APIPASS'   => array('type'    => 'text',
                              'default' => ''),
+        */
         'TESTMODE'  => array('type'    => 'checkbox',
                              'default' => 'yes'),
         'UNIQ'      => array('type'    => 'checkbox',
@@ -95,12 +95,7 @@ class dibs_fw_settingsBuilder_params {
                              'default' => 'blank'),
         'DISTR'     => array('type'    => 'select',
                              'default' => 'empty'),
-        'STATUS'    => array('type'    => 'select',
-                             'default' => '3'),
-        'STATUSP'   => array('type'    => 'select',
-                             'default' => '2'),
-        'STATUSC'   => array('type'    => 'select',
-                             'default' => '5')
+       
     );
     
     private $aLang = array(
@@ -122,7 +117,7 @@ class dibs_fw_settingsBuilder_params {
         'default' => 'Default',
         'basal'   => 'Basal',
         'rich'    => 'Rich',
-        'own'     => 'Own decorator'
+        'responsive' => 'Responsive'
     );
     
     private $aColor = array(
@@ -178,24 +173,6 @@ class dibs_fw_settingsBuilder_params {
     
     protected function cms_get_distr() {
         return $this->aDistr;
-    }
-    
-    protected function cms_get_status() {
-        global $wpsc_purchlog_statuses;
-        
-        $aStatuses = array();
-        for($i=0; $i<count($wpsc_purchlog_statuses); $i++) {
-            $aStatuses[$wpsc_purchlog_statuses[$i]['order']] = $wpsc_purchlog_statuses[$i]['label'];
-        }
-        return $aStatuses;
-    }
-    
-    protected function cms_get_statusp() {
-        return $this->cms_get_status();
-    }
-    
-    protected function cms_get_statusc() {
-        return $this->cms_get_status();
     }
     
     protected function cms_get_config($sKey, $sDefault, $sPrefix = "DIBS") {
