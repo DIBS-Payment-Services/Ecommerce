@@ -104,7 +104,7 @@ class dibs_fw_helpers extends dibs_fw_helpers_cms implements dibs_fw_helpers_int
         $aItems = array();
         foreach($mOrderInfo['cart']->cart_items as $oItem) {
             $aTax = $mOrderInfo['taxes'][$oItem->product_id];
-            $fPrice = $mOrderInfo['isincl'] == 1 ? 
+            $fPrice = isset($mOrderInfo['isincl']) && $mOrderInfo['isincl'] == 1 ? 
                       dibs_fw_helpers_cms::cms_dibs_getInclTax($oItem->unit_price, $aTax['rate']) :
                       $oItem->unit_price;
 
@@ -138,7 +138,7 @@ class dibs_fw_helpers extends dibs_fw_helpers_cms implements dibs_fw_helpers_int
      */
     public function helper_dibs_obj_ship($mOrderInfo) {
         $aTax = $mOrderInfo['shipping']['tax'];
-        $fRate = $mOrderInfo['isincl'] == 1 ? 
+        $fRate = isset($mOrderInfo['isincl']) && $mOrderInfo['isincl'] == 1 ? 
                  dibs_fw_helpers_cms::cms_dibs_getInclTax($mOrderInfo['shipping']['rate'], $aTax['rate']) :
                  $mOrderInfo['shipping']['rate'];
         return (object) array(
@@ -159,25 +159,66 @@ class dibs_fw_helpers extends dibs_fw_helpers_cms implements dibs_fw_helpers_int
      */
     public function helper_dibs_obj_addr($mOrderInfo) {
         $aAddr = $mOrderInfo['user'];
-
-        return (object) array(
-            'shippingfirstname'   => $aAddr[$this->helper_dibs_tools_conf('form_first_name_d')],
-            'shippinglastname'    => $aAddr[$this->helper_dibs_tools_conf('form_last_name_d')],
-            'shippingpostalcode'  => $aAddr[$this->helper_dibs_tools_conf('form_post_code_d')],
-            'shippingpostalplace' => $aAddr[$this->helper_dibs_tools_conf('form_city_d')],
-            'shippingaddress2'    => $aAddr[$this->helper_dibs_tools_conf('form_address_d')],
-            'shippingaddress'     => $aAddr[$this->helper_dibs_tools_conf('form_country_d')][0] . " " .
-                                     $aAddr[$this->helper_dibs_tools_conf('form_state_d')],
-            'billingfirstname'    => $aAddr[$this->helper_dibs_tools_conf('form_first_name_b')],
-            'billinglastname'     => $aAddr[$this->helper_dibs_tools_conf('form_last_name_b')],
-            'billingpostalcode'   => $aAddr[$this->helper_dibs_tools_conf('form_post_code_b')],
-            'billingpostalplace'  => $aAddr[$this->helper_dibs_tools_conf('form_city_b')],
-            'billingaddress2'     => $aAddr[$this->helper_dibs_tools_conf('form_address_b')],
-            'billingaddress'      => $aAddr[$this->helper_dibs_tools_conf('form_country_b')][0] . " " .
-                                     $aAddr[$this->helper_dibs_tools_conf('form_state_b')],
-            'billingmobile'       => $aAddr[$this->helper_dibs_tools_conf('form_phone_b')],
-            'billingemail'        => $aAddr[$this->helper_dibs_tools_conf('form_email_b')]
-        );
+        
+        $addressInfo = array();
+        
+        if( isset($aAddr[$this->helper_dibs_tools_conf('form_first_name_d')])) {
+            $addressInfo['shippingfirstname'] = $aAddr[$this->helper_dibs_tools_conf('form_first_name_d')];
+        }
+        
+        if( isset($aAddr[$this->helper_dibs_tools_conf('form_last_name_d')])) {
+            $addressInfo['shippinglastname'] = $aAddr[$this->helper_dibs_tools_conf('form_last_name_d')];
+        }
+   
+        if( isset($aAddr[$this->helper_dibs_tools_conf('form_post_code_d')])) {
+            $addressInfo['shippingpostalcode'] = $aAddr[$this->helper_dibs_tools_conf('form_post_code_d')];
+        }
+        
+        if( isset($aAddr[$this->helper_dibs_tools_conf('form_city_d')])) {
+            $addressInfo['shippingpostalplace'] = $aAddr[$this->helper_dibs_tools_conf('form_city_d')];
+        }
+        
+        if( isset($aAddr[$this->helper_dibs_tools_conf('form_address_d')])) {
+            $addressInfo['shippingaddress2'] = $aAddr[$this->helper_dibs_tools_conf('form_address_d')];
+        }
+        
+        if( isset($aAddr[$this->helper_dibs_tools_conf('form_address_d')])) {
+            $addressInfo['shippingaddress'] = $aAddr[$this->helper_dibs_tools_conf('form_address_d')];
+        }
+        
+        if( isset($aAddr[$this->helper_dibs_tools_conf('form_first_name_b')])) {
+             $addressInfo['billingfirstname'] = $aAddr[$this->helper_dibs_tools_conf('form_first_name_b')];
+        }
+        
+        if( isset($aAddr[$this->helper_dibs_tools_conf('form_last_name_b')])) {
+             $addressInfo['billinglastname'] = $aAddr[$this->helper_dibs_tools_conf('form_last_name_b')];
+        }
+        
+        if( isset($aAddr[$this->helper_dibs_tools_conf('form_post_code_b')])) {
+             $addressInfo['billingpostalcode'] = $aAddr[$this->helper_dibs_tools_conf('form_post_code_b')];
+        }
+        
+        if( isset($aAddr[$this->helper_dibs_tools_conf('form_city_b')])) {
+             $addressInfo['billingpostalplace'] = $aAddr[$this->helper_dibs_tools_conf('form_city_b')];
+        }
+        
+        if( isset($aAddr[$this->helper_dibs_tools_conf('form_address_b')])) {
+             $addressInfo['billingaddress'] = $aAddr[$this->helper_dibs_tools_conf('form_address_b')];
+        }
+        
+        if( isset($aAddr[$this->helper_dibs_tools_conf('form_address_b')])) {
+             $addressInfo['billingaddress2'] = $aAddr[$this->helper_dibs_tools_conf('form_address_b')];
+        }
+        
+        if( isset($aAddr[$this->helper_dibs_tools_conf('form_phone_b')])) {
+             $addressInfo['billingmobile'] = $aAddr[$this->helper_dibs_tools_conf('form_phone_b')];
+        }
+        
+        if( isset($aAddr[$this->helper_dibs_tools_conf('form_email_b')])) {
+             $addressInfo['billingemail'] = $aAddr[$this->helper_dibs_tools_conf('form_email_b')];
+        }
+        
+        return (object) $addressInfo;
     }
 
     /**
@@ -214,14 +255,13 @@ class dibs_fw_helpers extends dibs_fw_helpers_cms implements dibs_fw_helpers_int
     public function helper_dibs_hook_callback($oOrder) {
         if(isset($_POST['realorderid']) && $_POST['realorderid'] ) {
                 $orderid = $_POST['realorderid'];
-                $comment = "Callback was received form DIBS, "
-                         . "transaction={$_POST['transact']}, orderid={$orderid}";
+                /*$comment = "Callback was received form DIBS, "
+                         . "transaction={$_POST['transact']}, orderid={$orderid}";*/
                 $purchase_log = new WPSC_Purchase_Log($orderid);
                 $purchase_log->set('processed', WPSC_Purchase_Log::ACCEPTED_PAYMENT);
                 $purchase_log->set('transactid',  $_POST['transact']);
-                $purchase_log->set('notes', $comment);
+                //$purchase_log->set('notes', $comment);
                 $purchase_log->save();
             }
     }
 }
-?>

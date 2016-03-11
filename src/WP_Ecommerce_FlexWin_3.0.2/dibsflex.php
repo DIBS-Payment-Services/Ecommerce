@@ -51,7 +51,6 @@ function gateway_dibsflex($separator, $sessionid) {
     $oDIBS->helper_dibs_db_write("UPDATE `" . WPSC_TABLE_PURCHASE_LOGS . "`
                                            SET `processed` = '2'
                                            WHERE `id` = '" . $aPurchaseLog['id'] . "' LIMIT 1;");
-    
     $mOrderInfo = array(
         'currency'   => $sCurrency,
         'user'       => $aUserInfo,
@@ -60,11 +59,9 @@ function gateway_dibsflex($separator, $sessionid) {
         'shipping'   => $aProdFees['shipping'],
         'id'         => $aPurchaseLog['id'],
         'taxes'      => $aProdFees['items'],
-        'isincl'     => $aProdFees['incl'],
         'additional' => array('pid' => $sessionid),
         'total_tax'  => $wpsc_cart->total_tax
     );
-
     
     $aData = $oDIBS->api_dibs_get_requestFields($mOrderInfo);
 
@@ -76,12 +73,12 @@ function gateway_dibsflex($separator, $sessionid) {
     $sOutput .= '<input type="submit" name="submit_to_dibs" value="Continue with DIBS Payment..." />' . "\n";
   
     $sOutput .= '</form>'. "\n";
+    
     echo $sOutput;
     echo "<script language=\"javascript\" type=\"text/javascript\">
              setTimeout('document.getElementById(\'dibsflex_form\').submit()', 5000);
           </script>";
-    
-
+  
     exit();
     
 }
@@ -337,6 +334,14 @@ function form_dibsflex() {
     return $oDibsSb->render() . $sFieldsSync;
 }
 
-//add_action('wpsc_billing_details_bottom', 'nzshpcrt_dibsflex_cgibuttons');
-//add_action('init', 'nzshpcrt_dibsflex_cgi');
 add_action('init', 'nzshpcrt_dibsflex_process');
+add_action('wpsc_purchlogitem_metabox_end', 'dibspayment_paywin_purchlogitem_metabox_end_flexwin');
+function dibspayment_paywin_purchlogitem_metabox_end_flexwin($log_id) {
+     $log = new WPSC_Purchase_Log( $log_id );
+     $log_data_arr = $log->get_data();
+     if( $log_data_arr['gateway'] ==  'dibsflex'
+                && $log_data_arr['transactid']) {
+
+        echo "<b>DIBS transactionid</b> =<b>" . $log_data_arr['transactid'] . "</b>";
+     }
+}
