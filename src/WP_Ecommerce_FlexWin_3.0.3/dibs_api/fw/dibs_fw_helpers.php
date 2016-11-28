@@ -246,7 +246,7 @@ class dibs_fw_helpers extends dibs_fw_helpers_cms implements dibs_fw_helpers_int
      */
     public function helper_dibs_obj_etc($mOrderInfo) {
         return (object) array(
-            'sysmod'      => 'wp3e_3_0_2',
+            'sysmod'      => 'wp3e_3_0_3',
             'callbackfix' => $this->helper_dibs_tools_url('/?dibsflex_callback=true'),
             'pid'         => $mOrderInfo['additional']['pid'],
         );

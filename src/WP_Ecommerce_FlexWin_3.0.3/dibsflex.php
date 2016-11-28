@@ -4,7 +4,7 @@
 	Plugin Name: DIBS FlexWin Payment Gateway for WP e-Commerce
 	Plugin URI: 
 	Description: Payment plugin for Wordpress Ecommerce allow to use DIBS FlexWin.  
-	Version: 3.0.2
+	Version: 3.0.3
 	Author: dibs
 */
 
@@ -84,17 +84,17 @@ function gateway_dibsflex($separator, $sessionid) {
 }
 
 function nzshpcrt_dibsflex_process() {
-    if(isset($_POST['s_pid'])) {
-        array_walk($_POST, create_function('&$val', '$val = stripslashes($val);'));
+    if(isset($_REQUEST['s_pid'])) {
+        array_walk($_REQUEST, create_function('&$val', '$val = stripslashes($val);'));
         $oDIBS = new dibs_fw_api();
-        $mOrder = $oDIBS->cms_dibs_getOrderById($_POST['s_pid']);
+        $mOrder = $oDIBS->cms_dibs_getOrderById($_REQUEST['s_pid']);
         if(isset($_REQUEST['dibsflex_success']) && $_REQUEST['dibsflex_success'] == 'true') {
             if(!isset($_GET['page_id']) || get_permalink($_GET['page_id']) != get_option('transact_url')) {
                 $iCode = $oDIBS->api_dibs_action_success($mOrder);
                 if(empty($iCode)) {
-                    $sTransac = isset($_POST['transact']) ? 
-                                dibs_fw_api::api_dibs_sqlEncode($_POST['transact']) : "";
-                    $sLocation = add_query_arg('sessionid', $_POST['s_pid'], get_option('transact_url'));
+                    $sTransac = isset($_REQUEST['transact']) ? 
+                                dibs_fw_api::api_dibs_sqlEncode($_REQUEST['transact']) : "";
+                    $sLocation = add_query_arg('sessionid', $_REQUEST['s_pid'], get_option('transact_url'));
                     wp_redirect($sLocation);
                     exit();
                 }
@@ -106,7 +106,7 @@ function nzshpcrt_dibsflex_process() {
         }
         elseif(isset($_REQUEST['dibsflex_cancel']) && $_REQUEST['dibsflex_cancel'] == 'true') {
                 $oDIBS->api_dibs_action_cancel();
-                if (isset($_POST['orderid'])) {
+                if (isset($_REQUEST['orderid'])) {
                      wp_redirect(get_option( 'shopping_cart_url' ));
                      exit();
                 }
@@ -117,6 +117,7 @@ function nzshpcrt_dibsflex_process() {
         }
     }
 }
+
 
 /*
  * Not realized yet!!

@@ -308,28 +308,28 @@ class dibs_fw_api extends dibs_fw_helpers {
      * @return int 
      */
     private function api_dibs_checkMainFields($mOrder) {
-        if(!isset($_POST['orderid'])) return 1;
+        if(!isset($_REQUEST['orderid'])) return 1;
         $mOrder = $this->helper_dibs_obj_order($mOrder, TRUE);
         if(!$mOrder->orderid) return 2;
 
-        if(!isset($_POST['amount'])) return 3;
-        if(isset($_POST['voucher_amount']) && $_POST['voucher_amount'] > 0) {
-            $iAmount = ($_POST['amount'] == 0) ? $_POST['voucher_amount'] : $_POST['amount_original'];
+        if(!isset($_REQUEST['amount'])) return 3;
+        if(isset($_REQUEST['voucher_amount']) && $_REQUEST['voucher_amount'] > 0) {
+            $iAmount = ($_REQUEST['amount'] == 0) ? $_REQUEST['voucher_amount'] : $_REQUEST['amount_original'];
         }
-        else $iAmount = $_POST['amount'];
-        $iFeeAmount = (isset($_POST['fee']) && $_POST['fee'] > 0) ? 
-                      $iAmount - $_POST['fee'] : $iAmount;
+        else $iAmount = $_REQUEST['amount'];
+        $iFeeAmount = (isset($_REQUEST['fee']) && $_REQUEST['fee'] > 0) ? 
+                      $iAmount - $_REQUEST['fee'] : $iAmount;
 
         if(abs((int)$iAmount - (int)self::api_dibs_round($mOrder->amount)) >= 0.01 &&
            abs((int)$iFeeAmount - (int)self::api_dibs_round($mOrder->amount)) >= 0.01) return 4;
-	if(!isset($_POST['currency'])) return 5;
-        if((int)$mOrder->currency != (int)$_POST['currency']) return 6;
+	if(!isset($_REQUEST['currency'])) return 5;
+        if((int)$mOrder->currency != (int)$_REQUEST['currency']) return 6;
            
         if(self::api_dibs_checkHash($this->helper_dibs_tools_conf('md51'), 
                                     $this->helper_dibs_tools_conf('md52')) !== TRUE) return 7;
         
-        return 0;
-    }
+        return 0;        
+   }
 
     /**
      * Give fallback verification error page 
