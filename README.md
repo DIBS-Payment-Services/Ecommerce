@@ -22,7 +22,7 @@ ver. 4.1.6 Release date: 22.05.2014
 - On invoice payments acquirer parameters saves in ordeer details. 
 
 ver. 4.1.7 Release date: 10.08.2014
-- added possibility to add DIBS logos in admin
+- added possibility to add Nets logos in admin
   http://tech.dibspayment.com/logos#check-out-logos
 ver. 4.1.8 Release date: 21.01.2015
 - added support for DX platform
