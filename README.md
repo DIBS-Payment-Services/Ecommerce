@@ -4,7 +4,7 @@ just copy <code>dibspw.php</code> file in your Wordpress E-commerce <code>wp-e-c
 Setup
 =====
 Login in wordress, go to <b>Settings->Store->Payments</b>
-Find "DIBS Payment Window" and click Settings under it. 
+Find "NETS Payment Window" and click Settings under it. 
 Fill settings like merchantid, hmac code, partnerid(if you have it) e.t.c 
 Enable module. 
 Set test mode and try to test it. 
